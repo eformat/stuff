@@ -136,9 +136,9 @@ openshift_hosted_registry_replicas=1
 openshift_hosted_registry_storage_kind=nfs
 openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
 openshift_hosted_registry_storage_host=nfs.example.com
-openshift_hosted_registry_storage_nfs_directory=/mnt/stuff
+openshift_hosted_registry_storage_nfs_directory=/mnt/registry
 openshift_hosted_registry_storage_volume_name=registry
-openshift_hosted_registry_storage_volume_size=10Gi
+openshift_hosted_registry_storage_volume_size=100Gi
 
 # Metrics
 # Storage Options
