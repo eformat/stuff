@@ -16,6 +16,7 @@ sestatus
 -- DNS - properly functioning DNS environment
 # openshift_use_dnsmasq=true
 
+nmcli con mod <name> ipv4.dns “10.250.64.61 10.250.64.62 192.168.110.53”
 dig <node_hostname> @<IP_address> +short
 
 -- Wildcard
