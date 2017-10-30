@@ -4,6 +4,7 @@ masters
 etcd
 nodes
 lb
+nfs
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
@@ -130,13 +131,12 @@ openshift_registry_selector="role=infra"
 openshift_hosted_registry_replicas=1
 
 # Registry storage external NFS
-# NFS volume must already exist with path "nfs_directory/_volume_name" on
-# the storage_host. For example, the remote volume path using these
-# options would be "nfs.example.com:/exports/registry"
+# NFS host group
+# NFS volume is created during an advanced install with the path 
 openshift_hosted_registry_storage_kind=nfs
 openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
-openshift_hosted_registry_storage_host=nfs.example.com
-openshift_hosted_registry_storage_nfs_directory=/mnt/registry
+openshift_hosted_registry_storage_nfs_directory=/exports/nfs
+openshift_hosted_registry_storage_nfs_options='*(rw,root_squash,no_wdelay)'
 openshift_hosted_registry_storage_volume_name=registry
 openshift_hosted_registry_storage_volume_size=100Gi
 
@@ -156,27 +156,26 @@ openshift_hosted_logging_elasticsearch_cluster_size=1
 
 # Configure logrotate scripts
 # See: https://github.com/nickhammond/ansible-logrotate
-#logrotate_scripts=[{"name": "syslog", "path": "/var/log/cron\n/var/log/maillog\n/var/log/messages\n/var/log/secure\n/var/log/spooler\n", "options": ["daily", "rotate 7", "compress", "sharedscripts", "missingok"], "scripts": {"postrotate": "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"}}]
+logrotate_scripts=[{"name": "syslog", "path": "/var/log/cron\n/var/log/maillog\n/var/log/messages\n/var/log/secure\n/var/log/spooler\n", "options": ["daily", "rotate 7", "compress", "sharedscripts", "missingok"], "scripts": {"postrotate": "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"}}]
 
 [masters]
-ose-master03.example.com
-ose-master02.example.com
-ose-master01.example.com
+master0.example.com
+master1.example.com
+master2.example.com
 
 [etcd]
-ose-master03.example.com
-ose-master02.example.com
-ose-master01.example.com
+master0.example.com
+master1.example.com
+master2.example.com
 
-# [lb]
-ose3-lb-ansible.example.com
+[lb]
+lb.example.com
+
+[nfs]
+nfs.example.com
 
 [nodes]
-ose-master01.example.com openshift_node_labels="{'role': 'master'}" openshift_scheduleable=false
-ose-master02.example.com openshift_node_labels="{'role': 'master'}" openshift_scheduleable=false
-ose-master03.example.com openshift_node_labels="{'role': 'master'}" openshift_scheduleable=false
-ose-infra-node01.example.com openshift_node_labels="{'role': 'infra'}"
-ose-infra-node02.example.com openshift_node_labels="{'role': 'infra'}"
-ose-infra-node03.example.com openshift_node_labels="{'role': 'infra', 'role': 'router'}"
-ose-app-node00.example.com openshift_node_labels="{'role': 'app'}"
-ose-app-node01.example.com openshift_node_labels="{'role': 'app'}"
+master[0:2].example.com openshift_node_labels="{'role': 'master', 'zone': 'default'}" openshift_scheduleable=false
+infra-node[0:1].example.com openshift_node_labels="{'role': 'infra', 'zone': 'default'}"
+infra-node02.example.com openshift_node_labels="{'role': 'infra', 'role': 'router', 'zone': 'default'}"
+app-node[0:1].example.com openshift_node_labels="{'role': 'app', 'zone': 'default'}"
