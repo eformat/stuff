@@ -145,10 +145,14 @@ $TTL 86400
 ;
 ;
  IN NS dns1.lab.com.
-dns1 IN A 192.168.122.1
-ose3-master IN A 192.168.122.60
-*.cloudapps 300 IN A 192.168.122.60
+dns1        IN  A  192.168.122.1
+ose3-master IN  A  192.168.122.60
+*.cloudapps IN  A  192.168.122.60
 
+
+-- may have multiple A records, client side dns round robin
+*      IN      A       192.168.137.100
+       IN      A       192.168.137.101
 
 # vi /etc/named.conf 
 //

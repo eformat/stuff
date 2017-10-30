@@ -7,12 +7,13 @@ lb
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
+
 # SSH user, this user should allow ssh based auth without requiring a
 # password. If using ssh key based auth, then the key should be managed by an
 # ssh agent.
 ansible_ssh_user=root
 
-# Debug level for all OpenShift components (Defaults to 2)
+# Debug level for all OpenShift components (defaults to 2)
 debug_level=2
 openshift_debug_level=2
 openshift_node_debug_level=2
@@ -51,8 +52,8 @@ osm_cockpit_plugins=['cockpit-kubernetes']
 # or to one or all of the masters defined in the inventory if no load
 # balancer is present.
 openshift_master_cluster_method=native
-openshift_master_cluster_hostname=masterocp.example.com
-openshift_master_cluster_public_hostname=masterocp.example.com
+openshift_master_cluster_hostname=master.example.com
+openshift_master_cluster_public_hostname=master.example.com
 
 # Configure master API and console ports
 openshift_master_api_port=443
@@ -64,22 +65,20 @@ openshift_master_console_port=443
 # Global Proxy Configuration
 # These options configure HTTP_PROXY, HTTPS_PROXY, and NOPROXY environment
 # variables for docker and master services.
-openshift_http_proxy='http://localhost:3128'
-openshift_https_proxy='https://localhost:3128'
-openshift_no_proxy='.example.com.au,localhost,127.0.0.0/8,10.50.0.0,.cluster.local'
+openshift_http_proxy='http://proxy.example.com:3128'
+openshift_https_proxy='https://proxy.example.com:3128'
+openshift_no_proxy='.example.com,localhost,127.0.0.0/8,10.50.0.0,.cluster.local'
 
 # These options configure the BuildDefaults admission controller which injects
 # environment variables into Builds. These values will default to the global proxy
 # config values. You only need to set these if they differ from the global settings
 # above. See BuildDefaults
 # documentation at https://docs.openshift.org/latest/admin_guide/build_defaults_overrides.html
-#openshift_builddefaults_http_proxy=http://USER:PASSWORD@HOST:PORT
-#openshift_builddefaults_https_proxy=https://USER:PASSWORD@HOST:PORT
+openshift_builddefaults_http_proxy='https://proxy.example.com:3128'
+openshift_builddefaults_https_proxy='https://proxy.example.com:3128'
+openshift_builddefaults_git_http_proxy='https://proxy.example.com:3128'
+openshift_builddefaults_git_https_proxy='https://proxy.example.com:3128'
 #openshift_builddefaults_no_proxy=build_defaults
-#openshift_builddefaults_git_http_proxy=http://USER:PASSWORD@HOST:PORT
-#openshift_builddefaults_git_https_proxy=https://USER:PASSWORD@HOST:PORT
-# Or you may optionally define your own serialized as json
-#openshift_builddefaults_json='{"BuildDefaults":{"configuration":{"kind":"BuildDefaultsConfig","apiVersion":"v1","gitHTTPSProxy":"http://proxy.example.com.redhat.com:3128","gitHTTPProxy":"http://proxy.example.com.redhat.com:3128","env":[{"name":"HTTP_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"HTTPS_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"NO_PROXY","value":"ose3-master.example.com"}]}}'
 
 # Configure usage of openshift_clock role.
 openshift_clock_enabled=true
@@ -94,24 +93,30 @@ openshift_clock_enabled=true
 openshift_use_openshift_sdn=true
 os_sdn_network_plugin_name='redhat/openshift-ovs-subnet'
 
+# Certificate Validity
+#openshift_hosted_registry_cert_expire_days=730
+#openshift_ca_cert_expire_days=1825
+#openshift_node_cert_expire_days=730
+#openshift_master_cert_expire_days=730
+#etcd_ca_default_days=1825
+
 # Router certificate (optional)
 # Provide local certificate paths which will be configured as the router's default certificate.
 # openshift_hosted_router_certificate={"certfile": "/path/to/router.crt", "keyfile": "/path/to/router.key", "cafile": "/path/to/router-ca.crt"}
-openshift_router_selector="role=infra"
-openshift_hosted_router_replicas=3
+openshift_router_selector="role=router"
+openshift_hosted_router_replicas=1
 
 # Default subdomain to use for exposed routes
-osm_default_subdomain=apps.eformat.me
+osm_default_subdomain=apps.example.com
 openshift_master_default_subdomain=apps.example.com
 
-# if using xfs, can set default max emptyDir
-openshift_node_local_quota_per_fsgroup=1024Mi
-
+# if using xfs, you can set default max emptydir size
+# openshift_node_local_quota_per_fsgroup=1024Mi
 
 # Registry
 openshift_hosted_registry_selector='registry=true'
 openshift_registry_selector="role=infra"
-openshift_hosted_registry_replicas=3
+openshift_hosted_registry_replicas=1
 
 # Registry storage external NFS
 # NFS volume must already exist with path "nfs_directory/_volume_name" on
@@ -125,10 +130,16 @@ openshift_hosted_registry_storage_volume_name=registry
 openshift_hosted_registry_storage_volume_size=10Gi
 
 # Metrics
+# Storage Options
+# If openshift_hosted_metrics_storage_kind is unset then metrics will be stored
+# in an EmptyDir volume and will be deleted when the cassandra pod terminates.
 openshift_hosted_metrics_deploy=true
 openshift_master_metrics_public_url=https://metrics.apps.example.com/hawkular/metrics
 
 # Logging
+# If openshift_hosted_logging_storage_kind is unset then logging will be stored
+# in an EmptyDir volume and will be deleted when the elasticsearch pod terminates.
+openshift_hosted_logging_deploy=true
 openshift_master_logging_public_url=https://logging.apps.example.com
 openshift_hosted_logging_elasticsearch_cluster_size=1
 
@@ -137,23 +148,24 @@ openshift_hosted_logging_elasticsearch_cluster_size=1
 #logrotate_scripts=[{"name": "syslog", "path": "/var/log/cron\n/var/log/maillog\n/var/log/messages\n/var/log/secure\n/var/log/spooler\n", "options": ["daily", "rotate 7", "compress", "sharedscripts", "missingok"], "scripts": {"postrotate": "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"}}]
 
 [masters]
-ose-master03.eformat.me 
-ose-master02.eformat.me
-ose-master01.eformat.me
+ose-master03.example.com
+ose-master02.example.com
+ose-master01.example.com
 
 [etcd]
-ose-master03.eformat.me
-ose-master02.eformat.me
-ose-master01.eformat.me
+ose-master03.example.com
+ose-master02.example.com
+ose-master01.example.com
 
 # [lb]
-ose3-lb-ansible.test.example.com
+ose3-lb-ansible.example.com
 
 [nodes]
-ose-master01.eformat.me openshift_node_labels="{'role': 'master'}" openshift_scheduleable=false
-ose-master02.eformat.me openshift_node_labels="{'role': 'master'}" openshift_scheduleable=false
-ose-master03.eformat.me openshift_node_labels="{'role': 'master'}" openshift_scheduleable=false
-ose-app-node01.eformat.me openshift_node_labels="{'role': 'app'}"
-ose-infra-node03.eformat.me openshift_node_labels="{'role': 'infra'}"
-ose-infra-node01.eformat.me openshift_node_labels="{'role': 'infra'}"
-ose-infra-node02.eformat.me openshift_node_labels="{'role': 'infra'}"
+ose-master01.example.com openshift_node_labels="{'role': 'master'}" openshift_scheduleable=false
+ose-master02.example.com openshift_node_labels="{'role': 'master'}" openshift_scheduleable=false
+ose-master03.example.com openshift_node_labels="{'role': 'master'}" openshift_scheduleable=false
+ose-infra-node03.example.com openshift_node_labels="{'role': 'infra'}"
+ose-infra-node01.example.com openshift_node_labels="{'role': 'infra'}"
+ose-infra-node02.example.com openshift_node_labels="{'role': 'infra', 'role': 'router'}"
+ose-app-node00.example.com openshift_node_labels="{'role': 'app'}"
+ose-app-node01.example.com openshift_node_labels="{'role': 'app'}"
