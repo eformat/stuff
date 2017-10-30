@@ -227,3 +227,98 @@ include "/etc/named.root.key";
 # left out reverse DNS, PTR records. If you need this you can of course add
 # zone file and set that up but it isn’t required for a lab configuration.
 
+----------------------------------------------
+
+$ for dc in $(oc get deploymentconfig --selector logging-infra=elasticsearch -o name); do
+    oc set volume $dc \
+          --add --overwrite --name=elasticsearch-storage \
+          --type=hostPath --path=/usr/local/es-storage
+    oc rollout latest $dc
+    oc scale $dc --replicas=1
+  done
+
+
+--------------------------------------------------
+
+-- nfs from bastion 
+
+-- via console, add disk to bastion
+
+-- on bastion
+iptables -I INPUT -p tcp -m state --state NEW -m tcp --dport 111 -j ACCEPT
+iptables -I INPUT -p tcp -m state --state NEW -m tcp --dport 2049 -j ACCEPT
+iptables -I INPUT -p tcp -m state --state NEW -m tcp --dport 20048 -j ACCEPT
+iptables -I INPUT -p tcp -m state --state NEW -m tcp --dport 50825 -j ACCEPT
+iptables -I INPUT -p tcp -m state --state NEW -m tcp --dport 53248 -j ACCEPT
+iptables-save > /etc/sysconfig/iptables
+
+sed -i -e 's/^RPCMOUNTDOPTS.*/RPCMOUNTDOPTS="-p 20048"/' -e 's/^STATDARG.*/STATDARG="-p 50825"/' /etc/sysconfig/nfs
+
+echo "Setting sysctl params..."
+grep -q fs.nlm /etc/sysctl.conf
+if [ $? -eq 1 ]
+then
+  sed -i -e '$afs.nfs.nlm_tcpport=53248' -e '$afs.nfs.nlm_udpport=53248' /etc/sysctl.conf
+fi
+systemctl enable rpcbind nfs-server
+sysctl -p
+systemctl start rpcbind nfs-server nfs-lock nfs-idmap
+systemctl stop firewalld
+systemctl disable firewalld
+
+-- nodes/selinux can mount nfs
+ansible "ocp-node-*" -m shell -a 'setsebool -P virt_use_nfs=true'
+ansible "ocp-infra-*" -m shell -a 'setsebool -P virt_use_nfs=true'
+
+-- create thin lvm for eack vol
+yum -y install lvm2*
+pvcreate /dev/disk/by-id/google-ocp-nfs-disk-1
+vgcreate ocp-nfs-disk-1 /dev/sdb
+lvcreate -l 100%FREE --type thin-pool --thinpool thin_pool ocp-nfs-disk-1
+vgchange -ay -K ocp-nfs-disk-1
+
+for x in {1..400}; do
+  #echo $x;
+  lvcreate -V1G -T ocp-nfs-disk-1/thin_pool --name pv$x
+  mkdir -p /mnt/ocp-nfs-disk-1/pv$x
+  chmod -R 777 /mnt/ocp-nfs-disk-1/pv$x
+  mke2fs -t ext4 /dev/ocp-nfs-disk-1/pv$x  
+  mount /dev/ocp-nfs-disk-1/pv$x /mnt/ocp-nfs-disk-1/pv$x
+  echo "/mnt/ocp-nfs-disk-1/pv$x *(rw,no_root_squash,no_wdelay,sync)" >> /etc/exports  
+  echo "/dev/ocp-nfs-disk-1/pv$x /mnt/ocp-nfs-disk-1/pv$x  ext4     defaults,nofail        0 0" >> /etc/fstab
+done
+
+vgchange -ay -K ocp-nfs-disk-1
+mount -a
+exportfs -va
+chmod -R 777 /mnt/ocp-nfs-disk-1
+
+-- as cluster admin
+oc project default
+
+for x in {1..400}; do
+oc create -f - <<EOF
+ {
+      "apiVersion": "v1",
+      "kind": "PersistentVolume",
+      "metadata": {
+        "name": "pv$x"
+      },
+      "spec": {
+        "capacity": {
+            "storage": "1Gi"
+           },
+        "accessModes": [ "ReadWriteOnce","ReadWriteMany","ReadOnlyMany" ],
+        "nfs": {
+            "path": "/mnt/ocp-nfs-disk-1/pv$x",
+            "server": "ocp-bastion"
+        },
+        "persistentVolumeReclaimPolicy": "Recycle"
+      }
+    }
+EOF
+done
+
+-- test it out
+oc new-project nexus --display-name="Nexus" --description="Nexus"
+oc new-app -f https://raw.githubusercontent.com/eformat/openshift-nexus/master/nexus.yaml -p VOLUME_CAPACITY=5Gi

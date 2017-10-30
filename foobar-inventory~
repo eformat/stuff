@@ -84,6 +84,7 @@ openshift_no_proxy='.example.com.au,localhost,127.0.0.0/8,10.50.0.0,.cluster.loc
 # Configure usage of openshift_clock role.
 openshift_clock_enabled=true
 
+
 # SDN configuration
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 #osm_cluster_network_cidr=10.128.0.0/14
@@ -124,9 +125,11 @@ openshift_hosted_registry_storage_nfs_directory=/mnt/stuff
 openshift_hosted_registry_storage_volume_name=registry
 openshift_hosted_registry_storage_volume_size=10Gi
 
+
 # Metrics
 openshift_hosted_metrics_deploy=true
 openshift_master_metrics_public_url=https://metrics.apps.example.com/hawkular/metrics
+
 
 # Logging
 openshift_master_logging_public_url=https://logging.apps.example.com
