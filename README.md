@@ -325,4 +325,10 @@ done
 -- test it out
 oc new-project nexus --display-name="Nexus" --description="Nexus"
 oc new-app -f https://raw.githubusercontent.com/eformat/openshift-nexus/master/nexus.yaml -p VOLUME_CAPACITY=5Gi
+
+
+--- install playbook
+
+ansible-playbook -i static-inventory /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml -e openshift_disable_check=disk_availability,docker_storage,memory_availability'
+
 ```
