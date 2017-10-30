@@ -4,7 +4,6 @@ masters
 etcd
 nodes
 lb
-nfs
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
@@ -134,9 +133,9 @@ openshift_hosted_registry_replicas=1
 # NFS host group
 # NFS volume is created during an advanced install with the path 
 openshift_hosted_registry_storage_kind=nfs
+openshift_hosted_registry_storage_host=nfs.example.com
 openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
 openshift_hosted_registry_storage_nfs_directory=/exports
-openshift_hosted_registry_storage_nfs_options='*(rw,root_squash,no_wdelay)'
 openshift_hosted_registry_storage_volume_name=registry
 openshift_hosted_registry_storage_volume_size=100Gi
 
@@ -170,9 +169,6 @@ master2.example.com
 
 [lb]
 lb.example.com
-
-[nfs]
-nfs.example.com
 
 [nodes]
 master[0:2].example.com openshift_node_labels="{'role': 'master', 'zone': 'default'}" openshift_scheduleable=false
