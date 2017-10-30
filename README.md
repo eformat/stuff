@@ -8,6 +8,7 @@
 -- https://docs.openshift.com/container-platform/3.6/install_config/install/host_preparation.html
 -- http://playbooks-rhtconsulting.rhcloud.com/playbooks/installation
 
+```
 -- must be enforcing
 sestatus
 
@@ -15,7 +16,9 @@ sestatus
 # openshift_clock_enabled=true
 
 -- DNS - properly functioning DNS environment
+
 # openshift_use_dnsmasq=true
+```
 
 nmcli con mod <name> ipv4.dns “10.250.64.61 10.250.64.62 192.168.110.53”
 dig <node_hostname> @<IP_address> +short
@@ -322,3 +325,4 @@ done
 -- test it out
 oc new-project nexus --display-name="Nexus" --description="Nexus"
 oc new-app -f https://raw.githubusercontent.com/eformat/openshift-nexus/master/nexus.yaml -p VOLUME_CAPACITY=5Gi
+```
