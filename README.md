@@ -30,6 +30,10 @@ grep "^dns=none" /etc/NetworkManager/NetworkManager.conf
 -- https://docs.openshift.com/container-platform/3.6/install_config/install/prerequisites.html#required-ports
 
 -- subscriptions (all hosts)
+subscription-manager unsubscribe --all
+subscription-manager unregister
+subscription-manager subscribe --pool=8a85f98159f1d69a0159f206ba0b480e
+
 subscription-manager register --username=<user_name> --password=<password>
 subscription-manager list --available --matches '*OpenShift*'
 subscription-manager attach --pool=<pool_id>
