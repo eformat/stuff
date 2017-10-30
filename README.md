@@ -9,6 +9,7 @@
 -- https://docs.openshift.com/container-platform/3.6/install_config/install/prerequisites.html
 -- https://docs.openshift.com/container-platform/3.6/install_config/install/host_preparation.html
 -- http://playbooks-rhtconsulting.rhcloud.com/playbooks/installation
+-- https://keithtenzer.com/2016/08/04/openshift-enterprise-3-2-all-in-one-lab-environment/
 
 -- must be enforcing
 sestatus
