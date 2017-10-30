@@ -243,11 +243,11 @@ include "/etc/named.root.key";
 -- please setup dns1, hostmaster, SOA details as approriate for your environment
 --
 
-vi /var/named/dynamic/openshift.bcc.ap.abn.zone 
+vi /var/named/dynamic/openshift.lab.com.zone 
 
-$ORIGIN openshift.bcc.ap.abn.
+$ORIGIN openshift.lab.com.
 $TTL 86400
-@ IN SOA dns1.openshift.bcc.ap.abn. hostmaster.openshift.bcc.ap.abn. (
+@ IN SOA dns1.openshift.lab.com. hostmaster.openshift.lab.com. (
  2001062501 ; serial
  21600 ; refresh after 6 hours
  3600 ; retry after 1 hour
@@ -255,7 +255,7 @@ $TTL 86400
  86400 ) ; minimum TTL of 1 day
 ;
 ;
- IN NS dns1.openshift.bcc.ap.abn.
+ IN NS dns1.openshift.lab.com.
 dns1        IN  A  XXX.XXX.XXX.XXX
 master      IN  A  10.250.90.29
 *.apps      IN  A  10.250.90.24
@@ -265,7 +265,7 @@ vi /etc/named.conf
 
 zone "lab.com" IN {
    type master;
-   file "/var/named/dynamic/openshift.bcc.ap.abn.zone";
+   file "/var/named/dynamic/openshift.lab.com.zone";
    allow-update { none; };
 };
 
