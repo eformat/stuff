@@ -320,7 +320,7 @@ oc create -f - <<EOF
             "path": "/mnt/ocp-nfs-disk-1/pv$x",
             "server": "ocp-bastion"
         },
-        "persistentVolumeReclaimPolicy": "Recycle"
+        "persistentVolumeReclaimPolicy": "Retain"
       }
     }
 EOF
