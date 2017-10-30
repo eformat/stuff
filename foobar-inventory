@@ -135,7 +135,7 @@ openshift_hosted_registry_replicas=1
 # NFS volume is created during an advanced install with the path 
 openshift_hosted_registry_storage_kind=nfs
 openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
-openshift_hosted_registry_storage_nfs_directory=/exports/nfs
+openshift_hosted_registry_storage_nfs_directory=/exports
 openshift_hosted_registry_storage_nfs_options='*(rw,root_squash,no_wdelay)'
 openshift_hosted_registry_storage_volume_name=registry
 openshift_hosted_registry_storage_volume_size=100Gi
