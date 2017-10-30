@@ -234,6 +234,46 @@ include "/etc/named.root.key";
 # left out reverse DNS, PTR records. If you need this you can of course add
 # zone file and set that up but it isn’t required for a lab configuration.
 
+-----------
+
+-- BIND DNS Setup
+
+--
+-- example bind files. adjust paths to files for your environment
+-- please setup dns1, hostmaster, SOA details as approriate for your environment
+--
+
+vi /var/named/dynamic/openshift.bcc.ap.abn.zone 
+
+$ORIGIN openshift.bcc.ap.abn.
+$TTL 86400
+@ IN SOA dns1.openshift.bcc.ap.abn. hostmaster.openshift.bcc.ap.abn. (
+ 2001062501 ; serial
+ 21600 ; refresh after 6 hours
+ 3600 ; retry after 1 hour
+ 604800 ; expire after 1 week
+ 86400 ) ; minimum TTL of 1 day
+;
+;
+ IN NS dns1.openshift.bcc.ap.abn.
+dns1        IN  A  XXX.XXX.XXX.XXX
+master      IN  A  10.250.90.29
+*.apps      IN  A  10.250.90.24
+
+
+vi /etc/named.conf
+
+zone "lab.com" IN {
+   type master;
+   file "/var/named/dynamic/openshift.bcc.ap.abn.zone";
+   allow-update { none; };
+};
+
+
+# left out reverse DNS, PTR records. If you need this you can of course add
+# zone file and set that up but it isn’t required for a lab configuration
+
+
 ----------------------------------------------
 
 $ for dc in $(oc get deploymentconfig --selector logging-infra=elasticsearch -o name); do
