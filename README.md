@@ -29,7 +29,10 @@ grep "^dns=none" /etc/NetworkManager/NetworkManager.conf
 -- Ports
 -- https://docs.openshift.com/container-platform/3.6/install_config/install/prerequisites.html#required-ports
 
+
 -- subscriptions (all hosts)
+subscription-manager config --server.proxy_hostname=proxy.sg.fap --server.proxy_port=3128
+
 subscription-manager unsubscribe --all
 subscription-manager unregister
 subscription-manager subscribe --pool=8a85f98159f1d69a0159f206ba0b480e
