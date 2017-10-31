@@ -397,6 +397,9 @@ ansible "master*" -m shell -a 'for x in {0..40}; do y=`printf "%03d" $x`; htpass
 FIRST_MASTER=master1
 ansible "${FIRST_MASTER}" -m shell -a 'for x in {0..40}; do y=`printf "%03d" $x`; oadm policy add-role-to-user system:registry user$y; done'
 
+-- managment token
+
+oc serviceaccounts get-token -n management-infra management-admin
 
 
 ```
