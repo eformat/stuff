@@ -376,8 +376,7 @@ oc new-app -f https://raw.githubusercontent.com/eformat/openshift-nexus/master/n
 
 ansible-playbook -i static-inventory /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml -e openshift_disable_check=disk_availability,docker_storage,memory_availability'
 
-```
-
+-- set admin user as cluster admin
 oc adm policy add-cluster-role-to-group sudoer system:authenticated \
       --config="/root/openshift-3.6.local.config/master/admin.kubeconfig" \
       --context="default/192-168-137-2:8443/system:admin"
@@ -397,3 +396,7 @@ ansible "all" -m shell -a 'systemctl restart atomic-openshift-node.service'
 ansible "master*" -m shell -a 'for x in {0..40}; do y=`printf "%03d" $x`; htpasswd -b /etc/origin/master/htpasswd user$y user$y; done'
 FIRST_MASTER=master1
 ansible "${FIRST_MASTER}" -m shell -a 'for x in {0..40}; do y=`printf "%03d" $x`; oadm policy add-role-to-user system:registry user$y; done'
+
+
+
+```
