@@ -399,10 +399,10 @@ ansible "${FIRST_MASTER}" -m shell -a 'for x in {0..40}; do y=`printf "%03d" $x`
 
 -- managment token
 
-oc serviceaccounts get-token -n openshift-infra management-admin
+oc serviceaccounts get-token -n management-infra management-admin
 
-oc adm new-project openshift-infra --description="Management Infrastructure"
-oc create -n openshift-infra -f - <<EOF
+oc adm new-project management-infra --description="Management Infrastructure"
+oc create -n management-infra -f - <<EOF
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -412,31 +412,31 @@ oc create -f - <<EOF
 apiVersion: v1
 kind: ClusterRole
 metadata:
-  name: openshift-infra-admin
+  name: management-infra-admin
 rules:
 - resources:
   - pods/proxy
   verbs:
   - '*'
 EOF
-oc adm policy add-role-to-user -n openshift-infra admin -z management-admin
-oc adm policy add-role-to-user -n openshift-infra openshift-infra-admin -z management-admin
-oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:openshift-infra:management-admin
-oc adm policy add-scc-to-user privileged system:serviceaccount:openshift-infra:management-admin
+oc adm policy add-role-to-user -n management-infra admin -z management-admin
+oc adm policy add-role-to-user -n management-infra management-infra-admin -z management-admin
+oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:management-infra:management-admin
+oc adm policy add-scc-to-user privileged system:serviceaccount:management-infra:management-admin
 
 
 
-oc create serviceaccount 'management-admin' -n 'openshift-infra'
-oc adm policy add-role-to-user -n openshift-infra admin -z management-admin
-oc adm policy add-role-to-user -n openshift-infra openshift-infra-admin -z management-admin
-oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:openshift-infra:management-admin
-oc adm policy add-cluster-role-to-user system:image-auditor system:serviceaccount:openshift-infra:management-admin
-oc adm policy add-scc-to-user privileged system:serviceaccount:openshift-infra:management-admin
+oc create serviceaccount 'management-admin' -n 'management-infra'
+oc adm policy add-role-to-user -n management-infra admin -z management-admin
+oc adm policy add-role-to-user -n management-infra management-infra-admin -z management-admin
+oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:management-infra:management-admin
+oc adm policy add-cluster-role-to-user system:image-auditor system:serviceaccount:management-infra:management-admin
+oc adm policy add-scc-to-user privileged system:serviceaccount:management-infra:management-admin
 
-oc create serviceaccount 'inspector-admin' -n 'openshift-infra'
-oc adm policy add-cluster-role-to-user system:image-puller system:serviceaccount:openshift-infra:inspector-admin
-oc adm policy add-scc-to-user privileged system:serviceaccount:openshift-infra:inspector-admin
-oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:openshift-infra:management-admin
+oc create serviceaccount 'inspector-admin' -n 'management-infra'
+oc adm policy add-cluster-role-to-user system:image-puller system:serviceaccount:management-infra:inspector-admin
+oc adm policy add-scc-to-user privileged system:serviceaccount:management-infra:inspector-admin
+oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:management-infra:management-admin
 
 
 ```
