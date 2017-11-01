@@ -425,7 +425,7 @@ oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:mana
 oc adm policy add-scc-to-user privileged system:serviceaccount:management-infra:management-admin
 
 
-
+--
 oc create serviceaccount 'management-admin' -n 'management-infra'
 oc adm policy add-role-to-user -n management-infra admin -z management-admin
 oc adm policy add-role-to-user -n management-infra management-infra-admin -z management-admin
@@ -437,6 +437,46 @@ oc create serviceaccount 'inspector-admin' -n 'management-infra'
 oc adm policy add-cluster-role-to-user system:image-puller system:serviceaccount:management-infra:inspector-admin
 oc adm policy add-scc-to-user privileged system:serviceaccount:management-infra:inspector-admin
 oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:management-infra:management-admin
+
+
+-- Env.Preparation
+ansible "node*" -m shell -a 'docker pull docker.io/openshift/jenkins-2-centos7 &'
+ansible "node*" -m shell -a 'docker pull docker.io/openshift/jenkins-slave-nodejs-centos7 &'
+ansible "node*" -m shell -a 'docker pull docker.io/openshift/jenkins-slave-maven-centos7 &'
+ansible "node*" -m shell -a 'docker pull registry.access.redhat.com/rhscl/mongodb-32-rhel7 &'
+ansible "node*" -m shell -a 'docker pull registry.access.redhat.com/jboss-fuse-6/fis-java-openshift &'
+ansible "node*" -m shell -a 'docker pull registry.access.redhat.com/rhscl/nodejs-6-rhel7 &'
+ansible "node*" -m shell -a 'docker pull registry.access.redhat.com/rhscl/nodejs-4-rhel7 &'
+ansible "node*" -m shell -a 'docker pull registry.access.redhat.com/rhscl/php-70-rhel7 &'
+ansible "node*" -m shell -a 'docker pull registry.access.redhat.com/rhscl/php-56-rhel7 &'
+ansible "node*" -m shell -a 'docker pull registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift &'
+
+ansible "node*" -m shell -a 'docker pull registry.access.redhat.com/openshift3/jenkins-slave-maven-rhel7 &'
+ansible "node*" -m shell -a 'docker pull registry.access.redhat.com/openshift3/jenkins-slave-nodejs-rhel7 &'
+
+ansible "node*" -m shell -a 'docker pull registry.access.redhat.com/openshift3/ose-sti-builder:v3.6.173.0.21 &'
+
+ansible "node*" -m shell -a 'docker pull registry.access.redhat.com/dotnet/dotnet-20-rhel7 &'
+
+ansible "node*" -m shell -a 'docker pull docker.io/mattf/workshop &'
+ansible "node*" -m shell -a 'docker pull docker.io/radanalyticsio/base-notebook &'
+
+ansible "node*" -m shell -a 'docker pull docker.io/radanalyticsio/radanalytics-java-spark:stable &'
+
+
+-- jenkins image streams
+oc import-image --all --insecure=true --confirm -n openshift docker.io/openshift/jenkins-2-centos7
+oc import-image --all --insecure=true --confirm -n openshift registry.access.redhat.com/openshift3/jenkins-2-rhel7
+oc import-image --all --insecure=true --confirm -n openshift docker.io/openshift/jenkins-slave-nodejs-centos7
+oc import-image --all --insecure=true --confirm -n openshift docker.io/openshift/jenkins-slave-maven-centos7
+
+-- jenkins templates
+oc apply -f https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.6/quickstart-templates/jenkins-ephemeral-template.json -n openshift
+oc apply -f https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.6/quickstart-templates/jenkins-persistent-template.json -n openshift
+
+-- mongo db for application
+oc apply -f https://raw.githubusercontent.com/openshift/openshift-ansible/master/roles/openshift_examples/files/examples/v3.6/db-templates/mongodb-persistent-template.json -n openshift
+oc apply -f https://raw.githubusercontent.com/openshift/origin/master/examples/jenkins/pipeline/samplepipeline.yaml -n openshift
 
 
 ```
